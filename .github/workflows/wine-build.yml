@@ -17,7 +17,7 @@ jobs:
       run: |
         sudo dpkg --add-architecture i386
         sudo apt-get update
-        sudo apt-get install -y flex bison build-essential gcc-multilib g++-multilib
+        sudo apt-get install -y flex bison build-essential gcc-multilib g++-multilib mingw-w64
         sudo apt-get install -y libx11-dev:i386 libx11-dev libfreetype6-dev:i386 libfreetype6-dev
 
     - name: Create isolated build directories
@@ -41,8 +41,11 @@ jobs:
       working-directory: ./build-wine32
       run: make install
 
+    - name: Compress portable artifact
+      run: tar -czvf winegdk-wow64-portable.tar.gz -C ${{ github.workspace }}/winegdk-portable .
+
     - name: Upload portable artifact
       uses: actions/upload-artifact@v4
       with:
-        name: winegdk-wow64-portable
-        path: ${{ github.workspace }}/winegdk-portable/
+        name: winegdk-wow64-portable-archive
+        path: winegdk-wow64-portable.tar.gz
