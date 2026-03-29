@@ -1,0 +1,48 @@
+name: Build Portable WineGDK (WoW64)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v4
+
+    - name: Enable 32-bit architecture and install multilib dependencies
+      run: |
+        sudo dpkg --add-architecture i386
+        sudo apt-get update
+        sudo apt-get install -y flex bison build-essential gcc-multilib g++-multilib
+        sudo apt-get install -y libx11-dev:i386 libx11-dev libfreetype6-dev:i386 libfreetype6-dev
+
+    - name: Create isolated build directories
+      run: |
+        mkdir build-wine64
+        mkdir build-wine32
+
+    - name: Configure and compile 64-bit architecture
+      working-directory: ./build-wine64
+      run: |
+        ../configure --enable-win64 --prefix=${{ github.workspace }}/winegdk-portable
+        make -j$(nproc)
+
+    - name: Configure and compile 32-bit architecture linked to 64-bit
+      working-directory: ./build-wine32
+      run: |
+        ../configure --with-wine64=../build-wine64 --prefix=${{ github.workspace }}/winegdk-portable
+        make -j$(nproc)
+
+    - name: Build combined portable directory
+      working-directory: ./build-wine32
+      run: make install
+
+    - name: Upload portable artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: winegdk-wow64-portable
+        path: ${{ github.workspace }}/winegdk-portable/
