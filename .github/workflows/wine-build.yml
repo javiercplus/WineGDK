@@ -38,8 +38,9 @@ jobs:
         make -j$(nproc)
 
     - name: Build combined portable directory
-      working-directory: ./build-wine32
-      run: make install
+      run: |
+        make -C ./build-wine32 install
+        make -C ./build-wine64 install
 
     - name: Compress portable artifact
       run: tar -czvf winegdk-wow64-portable.tar.gz -C ${{ github.workspace }}/winegdk-portable .
