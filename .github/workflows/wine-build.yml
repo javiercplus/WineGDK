@@ -28,13 +28,13 @@ jobs:
     - name: Configure and compile 64-bit architecture
       working-directory: ./build-wine64
       run: |
-        ../configure --enable-win64 --prefix=${{ github.workspace }}/winegdk-portable
+        ../configure --enable-win64 --disable-tests --prefix=${{ github.workspace }}/winegdk-portable
         make -j$(nproc)
 
     - name: Configure and compile 32-bit architecture linked to 64-bit
       working-directory: ./build-wine32
       run: |
-        ../configure --with-wine64=../build-wine64 --prefix=${{ github.workspace }}/winegdk-portable
+        ../configure --with-wine64=../build-wine64 --disable-tests --prefix=${{ github.workspace }}/winegdk-portable
         make -j$(nproc)
 
     - name: Build combined portable directory
